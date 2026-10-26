@@ -8,6 +8,8 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/sirupsen/logrus"
+
 	"github.com/ray-project/kuberay/historyserver/pkg/storage"
 	"github.com/ray-project/kuberay/historyserver/pkg/utils"
 )
@@ -162,18 +164,21 @@ func ReadLogFile(reader storage.StorageReader, prefix, logPath string) io.Reader
 	for _, name := range names {
 		offset, err := strconv.ParseInt(name, 10, 64)
 		if err != nil || offset < int64(joined.Len()) {
-			// not a chunk, or a stale one already be covered, skip it
+			// not a chunk, or a stale one already been covered, skip it
 			continue
 		}
 		if offset > int64(joined.Len()) {
 			// a real gap, stop here
+			logrus.Warnf("Chunk gap in %s: have %d bytes, next chunk starts at %d, returning truncated log", chunkDir, joined.Len(), offset)
 			break
 		}
 		chunk := reader.GetContent(prefix, path.Join(chunkDir, name))
 		if chunk == nil {
+			logrus.Warnf("Failed to get chunk %s/%s, returning truncated log", chunkDir, name)
 			break
 		}
 		if _, err := joined.ReadFrom(chunk); err != nil {
+			logrus.Warnf("Failed to read chunk %s/%s: %v, returning truncated log", chunkDir, name, err)
 			break
 		}
 	}
