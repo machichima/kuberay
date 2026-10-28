@@ -61,12 +61,12 @@ func TestIsDead(t *testing.T) {
 			p := NewSessionProcessor(nil, k, false)
 
 			info := utils.ClusterInfo{Namespace: ns, Name: name, SessionName: queriedSession}
-			gotDead, err := p.isDead(context.Background(), info)
+			gotDead, err := p.IsDead(context.Background(), info)
 			if err != nil {
 				t.Fatalf("unexpected error: %v", err)
 			}
 			if gotDead != tc.wantDead {
-				t.Fatalf("isDead = %v, want %v", gotDead, tc.wantDead)
+				t.Fatalf("IsDead = %v, want %v", gotDead, tc.wantDead)
 			}
 		})
 	}
@@ -89,7 +89,7 @@ func TestProcessSession_ServeRunningClusters(t *testing.T) {
 	}{
 		{"flag off, CR present -> live, no snapshot", false, rayCluster(ns, name), SessionStatusLive, false},
 		{"flag off, CR absent -> processed", false, nil, SessionStatusProcessed, true},
-		{"flag on, CR present -> processed from storage", true, rayCluster(ns, name), SessionStatusProcessed, true},
+		{"flag on, CR present -> processed running from storage", true, rayCluster(ns, name), SessionStatusProcessedRunning, true},
 		{"flag on, CR absent -> processed", true, nil, SessionStatusProcessed, true},
 	}
 
