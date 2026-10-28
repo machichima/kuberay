@@ -72,10 +72,15 @@ type fakeProcessor struct {
 	fn        func(ctx context.Context, info utils.ClusterInfo) (SessionStatus, *eventserver.SessionSnapshot, error)
 	// dead is what IsDead reports.
 	dead atomic.Bool
+	// deadErr, when set, is returned by IsDead instead of dead.
+	deadErr error
 }
 
 func (f *fakeProcessor) IsDead(context.Context, utils.ClusterInfo) (bool, error) {
 	f.deadCalls.Add(1)
+	if f.deadErr != nil {
+		return false, f.deadErr
+	}
 	return f.dead.Load(), nil
 }
 
@@ -740,4 +745,34 @@ func TestRevalidate_ReloadFailureKeepsStaleSnapshot(t *testing.T) {
 	entry.livenessMu.Lock()
 	defer entry.livenessMu.Unlock()
 	require.True(t, entry.seenDead, "seenDead must stay set so the next interval retries")
+}
+
+// TestRevalidate_CheckErrorKeepsGracePeriod verifies that a failed liveness check
+// counts as no observation, so NotFound -> error -> NotFound still reloads.
+func TestRevalidate_CheckErrorKeepsGracePeriod(t *testing.T) {
+	sl, fp := newRunningBuiltLoader(t, func(context.Context) (SessionStatus, *eventserver.SessionSnapshot, error) {
+		return SessionStatusProcessed, testSnapshot("fresh"), nil
+	})
+	fp.dead.Store(true)
+	key := testClusterSessionKey()
+
+	// First NotFound, then a failed check.
+	expireLivenessThrottle(t, sl)
+	sl.Revalidate(context.Background(), key)
+	fp.deadErr = errors.New("apiserver unavailable")
+	expireLivenessThrottle(t, sl)
+	sl.Revalidate(context.Background(), key)
+	sl.Wait()
+	require.Equal(t, int32(1), fp.callCount(), "a failed check must not trigger a reload")
+
+	// The next NotFound is still the second sighting.
+	fp.deadErr = nil
+	expireLivenessThrottle(t, sl)
+	sl.Revalidate(context.Background(), key)
+	sl.Wait()
+
+	// Reload is still triggered, so we get fresh data.
+	snap, ok := sl.GetSnapshot(key)
+	require.True(t, ok)
+	require.Equal(t, "fresh", snap.SessionKey)
 }

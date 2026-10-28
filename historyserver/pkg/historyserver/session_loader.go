@@ -203,7 +203,11 @@ func (s *SessionLoader) Revalidate(ctx context.Context, clusterSessionKey string
 	checkCtx, cancel := context.WithTimeout(ctx, livenessCheckTimeout)
 	dead, err := s.processor.IsDead(checkCtx, entry.info)
 	cancel()
-	dead = err == nil && dead
+	if err != nil {
+		// Keep seenDead value so a transient failure does not restart the grace period.
+		logrus.Warnf("Failed to check cluster state for session %q: %v", clusterSessionKey, err)
+		return
+	}
 
 	// Reload only on the second consecutive NotFound.
 	// By default, Kubernetes sends SIGKILL 30 seconds after a pod receives SIGTERM
