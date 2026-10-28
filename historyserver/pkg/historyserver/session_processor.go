@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/sirupsen/logrus"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	k8stypes "k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -69,7 +70,14 @@ func (p *SessionProcessor) ProcessSession(ctx context.Context, session utils.Clu
 		if isCtxCanceled(err) {
 			return SessionStatusCanceled, nil, err
 		}
-		return SessionStatusClusterStateUnknown, nil, fmt.Errorf("check cluster state for %s/%s: %w", session.Namespace, session.Name, err)
+		if !p.serveRunningClusters {
+			return SessionStatusClusterStateUnknown, nil, fmt.Errorf("check cluster state for %s/%s: %w", session.Namespace, session.Name, err)
+		}
+		// Running clusters are also served from storage, so a failed Kubernetes API
+		// check should not fail the load. Treat the cluster as running so Revalidate
+		// checks it again later.
+		logrus.Warnf("Failed to check cluster state for %s/%s, serving it as running: %v", session.Namespace, session.Name, err)
+		dead = false
 	}
 	if !dead && !p.serveRunningClusters {
 		return SessionStatusLive, nil, nil
