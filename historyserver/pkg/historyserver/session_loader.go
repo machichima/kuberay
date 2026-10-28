@@ -219,7 +219,9 @@ func (s *SessionLoader) Revalidate(ctx context.Context, clusterSessionKey string
 	s.wg.Go(func() {
 		if _, err := s.Reload(s.serverCtx, entry.info); err != nil {
 			logrus.Warnf("Background reload of session %q failed, keeping stale snapshot: %v", clusterSessionKey, err)
+			return
 		}
+		logrus.Infof("Reloaded session %q after its RayCluster was deleted", clusterSessionKey)
 	})
 }
 
