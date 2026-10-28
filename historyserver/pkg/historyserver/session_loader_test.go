@@ -628,7 +628,7 @@ func newRunningBuiltLoader(t *testing.T, reloadFn func(ctx context.Context) (Ses
 		}
 		return reloadFn(ctx)
 	})
-	sl := NewSessionLoader(context.Background(), fp, DefaultSessionProcessTimeout, DefaultSessionCacheSize, 0, 0)
+	sl := newTestLoader(t, fp, loaderTestConfig{})
 	_, err := sl.LoadSession(context.Background(), testClusterInfo())
 	require.NoError(t, err)
 	return sl, fp
