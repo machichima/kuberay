@@ -16,7 +16,7 @@ Try it here: [{{Doc title}}]({{docs.ray.io URL}}).
 {{sample excerpt}}
 ```
 
-See [{{sample file}}](<https://github.com/ray-project/kuberay/blob/master/ray-operator/config/samples/{{sample> file}}) for a full example.
+See [{{sample_file}}](https://github.com/kuberay-project/kuberay/blob/master/ray-operator/config/samples/{{sample_file}}) for a full example.
 
 ### Other Notable Features
 

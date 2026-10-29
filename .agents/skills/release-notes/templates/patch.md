@@ -15,4 +15,4 @@
 
 <!-- Click "Generate release notes" in the GitHub release UI and paste the "What's Changed" list here -->
 
-**Full Changelog**: <https://github.com/ray-project/kuberay/compare/{{prev_tag}}...{{new_tag}}>
+**Full Changelog**: <https://github.com/kuberay-project/kuberay/compare/{{prev_tag}}...{{new_tag}}>

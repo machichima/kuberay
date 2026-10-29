@@ -42,9 +42,10 @@ git diff <prev_tag>..<new_tag> --stat -- ray-operator/apis/ray/v1/ helm-chart/ku
 
 `source` tells where `release-note` came from:
 
-- `release-note-block`: the author filled the `release-note` / `breaking-change` fenced blocks. Use as-is, light edits
-  only.
-- `why-section`: blocks were empty; `release-note` holds the first paragraph of "Why are these changes needed?".
+- `release-note-block`: the PR has the `release-note` / `breaking-change` fenced blocks. Use as-is, light edits
+  only. An empty block means the author marked it not applicable.
+- `why-section`: the PR has no `release-note` block (it predates the template); `release-note` holds the first
+  paragraph of "Why are these changes needed?".
   Written for reviewers, not users. Rewrite, never paste.
 
 ### 2. Filter
