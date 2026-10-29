@@ -880,7 +880,7 @@
                         }
 
                         // `live` rows are proxied to the running dashboard, so there is no cached snapshot to invalidate.
-                        if (!isThisEntering && !isLive) {
+                        if (!isLive) {
                             const reloadBtn = document.createElement('button');
                             reloadBtn.type = 'button';
                             reloadBtn.className = isAnyEntering ? 'btn btn-icon btn-disabled' : 'btn btn-icon btn-secondary';
