@@ -687,7 +687,7 @@
                 renderTable();
 
                 const qs = reload ? '?reload=true' : '';
-                fetch(`/enter_cluster/${namespace}/raycluster/${name}/${session}${qs}`)
+                fetch(`/enter_cluster/${encodeURIComponent(namespace)}/raycluster/${encodeURIComponent(name)}/${encodeURIComponent(session)}${qs}`)
                     .then(res => {
                         if (!res.ok) {
                             return res.text().then(body => {
