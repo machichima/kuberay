@@ -841,6 +841,7 @@
                         const actionGroup = document.createElement('div');
                         actionGroup.className = 'action-group';
                         const btn = document.createElement('button');
+                        btn.type = 'button';
                         btn.disabled = isAnyEntering;
 
                         if (isThisEntering) {
@@ -881,6 +882,7 @@
                         // `live` rows are proxied to the running dashboard, so there is no cached snapshot to invalidate.
                         if (!isThisEntering && !isLive) {
                             const reloadBtn = document.createElement('button');
+                            reloadBtn.type = 'button';
                             reloadBtn.className = isAnyEntering ? 'btn btn-icon btn-disabled' : 'btn btn-icon btn-secondary';
                             reloadBtn.disabled = isAnyEntering;
                             reloadBtn.setAttribute('aria-label', `Reload ${c.name} (${c.sessionName}) from storage and open dashboard`);
